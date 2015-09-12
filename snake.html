@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>JS</title>
+	<style type="text/css">
+	body {
+		margin: 0 auto;
+		display: table;
+	}
+	td{
+
+		border: 1px solid black;
+		padding: 5px;
+	}
+	button{
+		margin: 20px;
+	}
+	.snake{
+		background-color: black;
+	}
+	.food{
+		background-color: green;
+	}
+
+	</style>
+</head>
+<body>
+	<button id ='easy' } >简单</button>
+	<button id ='normal' >普通</button>
+	<button id = 'hard' >困难</button>
+	<p>你的得分:</p>
+	<span id = 'score'>0</span>
+	<div id='map'></div>
+	<script type="text/javascript">
+	window.onload = function(){
+		var body =document.getElementsByTagName('body')[0];
+		var map=document.getElementById('map');
+		var table=document.createElement('table');
+		var tbody=document.createElement('tbody');
+		var tr = document.createElement('tr');
+		var td=document.createElement('td');
+		var grid =  document.getElementsByTagName('td');
+		var showscore = document.getElementById('score')
+		var easy = document.getElementById('easy')
+		var normal = document.getElementById('normal')
+		var hard = document.getElementById('hard')
+		var map = document.getElementById('map')
+
+		function initmap(){
+			map.innerHTML= "";
+			for (var j=0;j<20;j++){
+				var col = document.createElement('tr');
+				for (var i=0;i<20 ;i++){
+					var row=document.createElement('td');
+					col.appendChild(row);
+				}
+				table.appendChild(col);
+			}
+			map.appendChild(table)
+		}
+		
+		var score = 0;
+		var snake ={
+			body:[[1,1],[1,2]],
+			dir:[0,0],
+			move:function(){
+				var len = snake.body.length;
+				delsnake();
+				if(snake.dir[1]!=0||snake.dir[0]!=0){
+					for (var i=0 ; i<len-1;i++){
+						snake.body[i][0]=snake.body[i+1][0];
+						snake.body[i][1]=snake.body[i+1][1];
+					}
+					
+					snake.body[len-1][0]+=snake.dir[0];
+					snake.body[len-1][1]+=snake.dir[1];
+				}
+				var snakesign =(snake.body[len-1][0]-1)*20+snake.body[len-1][1]-1;
+				var foodsign = food.y*20+food.x;
+
+				if(snakesign == foodsign){
+					snake.body.push([food.y+1,food.x+1]);
+					snake.body[snake.body.length-1][0]=snake.body[snake.body.length-2][0];
+					snake.body[snake.body.length-1][0]=snake.body[snake.body.length-2][0];
+					for (var i=snake.body.length-2;i>0;i--){
+						snake.body[i][0]=snake.body[i-1][0];
+						snake.body[i][1]=snake.body[i-1][1];
+					}
+					snake.body[0][0]=snake.body[1][0];
+					snake.body[0][1]=snake.body[1][1];
+
+					score +=1;
+
+					delsnake();
+					initsnake();
+
+					showscore.innerHTML = score;
+					food.initfood();
+				}
+				for(var i = 0 ;i<len-2 ;i++){
+					var snakebody =(snake.body[i][0]-1)*20+snake.body[i][1]-1;
+					if (snakesign == snakebody){
+						alert("撞到身体啦 You lose！");
+						snake.body = [[1,1],[1,2]];
+						snake.dir = [0,0];
+					}
+
+				}
+				if(snake.body[len-1][0]<=0||snake.body[len-1][0]>20||snake.body[len-1][1]<=0||snake.body[len-1][1]>20){
+					alert("撞到墙啦 You lose!");
+					snake.body = [[1,1],[1,2]];
+					snake.dir = [0,0];
+				}
+				initsnake();
+			}
+		}
+		var food = {
+			x:0,
+			y:0,
+			initfood:function (){
+				food.x=parseInt(Math.random()*20);
+				food.y=parseInt(Math.random()*20);
+
+				var foodsign = food.y*20+food.x;
+				for(var flag = 0;flag<snake.body.length ;flag++){
+					var snakesign =(snake.body[flag][0]-1)*20+snake.body[flag][1]-1;
+					if(foodsign==snakesign){
+						food.initfood();
+						break;
+					}
+				}
+				grid[food.y*20+food.x].className='food';
+			}
+		}
+
+		function initsnake(){
+			for(var flag = 0;flag<snake.body.length ;flag++){
+				var sign =(snake.body[flag][0]-1)*20+snake.body[flag][1]-1;
+				grid[sign].className='snake'
+			}
+		}
+		function delsnake(){
+			for(var flag = 0;flag<snake.body.length ;flag++){
+				var sign =(snake.body[flag][0]-1)*20+snake.body[flag][1]-1;
+				grid[sign].className=''
+			}
+		}
+
+		var flag =0;
+		document.onkeydown = keyDown;
+		function keyDown(e){
+			
+			if(flag==0){
+				switch(e.keyCode){
+					case 37:
+					if(snake.dir[1]!=1){
+						snake.dir = [0,-1];
+					}
+					break;
+					case 38:
+					if(snake.dir[0]!=1){
+						snake.dir = [-1,0];
+					}
+					break;
+					case 39:
+					if(snake.dir[1]!=-1){
+						snake.dir=[0,1];
+					}
+					break;
+					case 40:
+					if(snake.dir[0]!=-1){
+						snake.dir = [1,0];
+					}
+					break;
+				}
+			}
+			flag++;
+		}
+
+		var speed;
+		initmap();
+		food.initfood();
+		var interval;
+		easy.onclick = function(){
+			score=0;
+			showscore.innerHTML=score;
+			delsnake();
+			snake.body = [[1,1],[1,2]];
+			snake.dir = [0,0];
+			interval=clearInterval(interval)
+			interval =interval =setInterval(
+				function(){ 
+					flag=0;
+					snake.move()
+				},500)
+
+		}
+		normal.onclick = function(){
+			score=0;
+			showscore.innerHTML=score;
+			delsnake();
+			snake.body = [[1,1],[1,2]];
+			snake.dir = [0,0];
+			interval=clearInterval(interval)
+			interval =setInterval(
+				function(){ 
+					flag=0;
+					snake.move()
+				},300)
+		}
+		hard.onclick = function(){
+			score=0;
+			showscore.innerHTML=score;
+			delsnake();
+			snake.body = [[1,1],[1,2]];
+			snake.dir = [0,0];
+			interval=clearInterval(interval)
+			interval =setInterval(
+				function(){ 
+					flag=0;
+					snake.move()
+				},100)
+		}
+
+	}
+	</script>
+</body>
+</html> 
